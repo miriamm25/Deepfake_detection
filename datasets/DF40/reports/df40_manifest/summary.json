@@ -1,0 +1,42 @@
+{
+  "root": "/cai3_ds_vm/downloads/deepfake_analysis/DF40",
+  "video_root": "/cai3_ds_vm/downloads/deepfake_analysis/DF40/video-data",
+  "out_manifest": "/cai3_ds_vm/downloads/deepfake_analysis/DF40/manifests/df40_videos_manifest.csv",
+  "num_mp4_found_under_video_root": 30307,
+  "num_rows_written": 30307,
+  "num_skipped": 0,
+  "counts_split_label": {
+    "test::fake": 15586,
+    "test::real": 99,
+    "train::fake": 14622
+  },
+  "counts_split_generator_label_top20": {
+    "train::simswap::fake": 989,
+    "train::inswap::fake": 883,
+    "test::wav2lip::fake": 808,
+    "test::sadtalker::fake": 802,
+    "test::MRAA::fake": 789,
+    "test::lia::fake": 789,
+    "test::danet::fake": 788,
+    "test::facedancer::fake": 788,
+    "test::mcnet::fake": 788,
+    "test::tpsm::fake": 788,
+    "test::one_shot::fake": 787,
+    "test::fomm::fake": 787,
+    "test::facevid2vid::fake": 782,
+    "test::simswap::fake": 782,
+    "test::blendface::fake": 782,
+    "test::hyperreenact::fake": 781,
+    "test::faceswap::fake": 777,
+    "test::mobileswap::fake": 777,
+    "test::pirender::fake": 776,
+    "test::uniface::fake": 767
+  },
+  "default_label_when_ambiguous": "fake",
+  "notes": [
+    "label_video e inferat din path: real/real_mp4 vs fake; altfel default_label",
+    "generator = folderul imediat dup\u0103 train/test",
+    "source_face = cdf/ff dac\u0103 apare ca segment \u00een path",
+    "video_uid = sha1(rel_path) -> stabil \u0219i unic (evit\u0103 coliziuni dac\u0103 exist\u0103 acela\u0219i nume \u00een foldere diferite)"
+  ]
+}

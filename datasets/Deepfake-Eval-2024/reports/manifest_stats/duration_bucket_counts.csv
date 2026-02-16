@@ -1,0 +1,11 @@
+split,duration_bucket,count
+test,10-30s,243
+test,30-60s,219
+test,60-120s,170
+test,120s+,107
+test,0-10s,76
+train,10-30s,364
+train,30-60s,297
+train,60-120s,262
+train,120s+,168
+train,0-10s,130

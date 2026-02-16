@@ -1,0 +1,54 @@
+{
+  "input_manifest": "manifests/df40_video_streams_manifest.csv",
+  "rows_video_ok": 36836,
+  "clips_total": 73676,
+  "clips_by_split": {
+    "test": 32681,
+    "train": 40995
+  },
+  "clips_by_bucket": {
+    "0-10s": 5700,
+    "10-30s": 51704,
+    "120s+": 64,
+    "30-60s": 15258,
+    "60-120s": 950
+  },
+  "clips_by_orientation": {
+    "horizontal": 37512,
+    "square": 35000,
+    "vertical": 1164
+  },
+  "clips_by_fps_bucket": {
+    "<=25": 20425,
+    ">=50": 11008,
+    "other": 24,
+    "~30": 42219
+  },
+  "clips_by_audio_group": {
+    "has_audio": 3134,
+    "no_audio": 70542
+  },
+  "policy": {
+    "0-10s": {
+      "n_clips": 1,
+      "clip_len_s": 5.0
+    },
+    "10-30s": {
+      "n_clips": 2,
+      "clip_len_s": 5.0
+    },
+    "30-60s": {
+      "n_clips": 3,
+      "clip_len_s": 5.0
+    },
+    "60-120s": {
+      "n_clips": 5,
+      "clip_len_s": 5.0
+    },
+    "120s+": {
+      "n_clips": 8,
+      "clip_len_s": 5.0
+    }
+  },
+  "seed": 13
+}

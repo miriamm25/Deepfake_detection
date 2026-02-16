@@ -1,0 +1,15 @@
+{
+  "rows_in_clips_std_manifest": 7324,
+  "rows_out_labeled": 7322,
+  "skipped_ffmpeg_fail": 2,
+  "skipped_unknown_label": 0,
+  "missing_video_ids_in_metadata": 0,
+  "unknown_video_ids": 0,
+  "counts_by_split_label": {
+    "train::real": 2567,
+    "train::fake": 1830,
+    "test::fake": 1244,
+    "test::real": 1681
+  },
+  "out_manifest": "manifests/clips_std_labeled_manifest.csv"
+}

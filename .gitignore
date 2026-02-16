@@ -1,0 +1,32 @@
+# Video/audio data
+*.mp4
+*.m4a
+*.avi
+*.mkv
+*.webm
+*.wav
+*.flac
+
+# Large data folders
+raw_videos/
+raw_zips/
+clips/
+clips_std/
+video-data/
+audio-data/
+image-data/
+metadata/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

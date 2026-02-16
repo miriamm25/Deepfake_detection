@@ -1,0 +1,41 @@
+{
+  "rows_analyzed": 2036,
+  "splits": [
+    "test",
+    "train"
+  ],
+  "duration_s": {
+    "min": 1.486077,
+    "median": 40.3353105,
+    "p90": 140.061891,
+    "max": 5632.882358
+  },
+  "vfr_by_split": [
+    {
+      "split": "test",
+      "n": 815,
+      "vfr_count": 34.0,
+      "vfr_ratio": 0.0417
+    },
+    {
+      "split": "train",
+      "n": 1221,
+      "vfr_count": 82.0,
+      "vfr_ratio": 0.0672
+    }
+  ],
+  "no_audio_by_split": [
+    {
+      "split": "test",
+      "n": 815,
+      "no_audio_count": 87,
+      "no_audio_ratio": 0.1067
+    },
+    {
+      "split": "train",
+      "n": 1221,
+      "no_audio_count": 111,
+      "no_audio_ratio": 0.0909
+    }
+  ]
+}

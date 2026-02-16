@@ -1,0 +1,3 @@
+split,n,vfr_count,vfr_ratio
+test,815,34.0,0.0417
+train,1221,82.0,0.0672

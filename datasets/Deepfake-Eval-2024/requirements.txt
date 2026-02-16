@@ -1,0 +1,15 @@
+# Deepfake-Eval-2024 Preprocessing Requirements
+# Install with: uv pip install -r requirements.txt
+
+# Core data processing
+pandas>=2.0.0
+
+# Video/file handling (will add as needed)
+# opencv-python>=4.8.0
+# yt-dlp>=2024.0.0
+
+# Progress bars (optional, will add if needed)
+# tqdm>=4.65.0
+
+matplotlib>=3.8
+seaborn>=0.13
