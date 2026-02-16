@@ -2,8 +2,6 @@
 import argparse
 import json
 import os
-import random
-from dataclasses import dataclass
 from typing import List, Tuple
 
 import pandas as pd
@@ -43,24 +41,6 @@ def derive_audio_group(has_audio: float) -> str:
     return "unknown"
 
 
-# -----------------------------
-# Clip planning policy
-# -----------------------------
-@dataclass
-class BucketPolicy:
-    n_clips: int
-    clip_len_s: float
-
-
-DEFAULT_POLICY = {
-    "0-10s": BucketPolicy(n_clips=1, clip_len_s=5.0),
-    "10-30s": BucketPolicy(n_clips=2, clip_len_s=5.0),
-    "30-60s": BucketPolicy(n_clips=3, clip_len_s=5.0),
-    "60-120s": BucketPolicy(n_clips=5, clip_len_s=5.0),
-    "120s+": BucketPolicy(n_clips=8, clip_len_s=5.0),
-}
-
-
 def uniform_windows(duration_s: float, clip_len_s: float, n: int) -> List[Tuple[float, float]]:
     """
     Returns n windows [start, end] inside [0, duration_s].
@@ -81,47 +61,22 @@ def uniform_windows(duration_s: float, clip_len_s: float, n: int) -> List[Tuple[
     return [(float(s), float(s + clip_len_s)) for s in starts]
 
 
-def jitter_windows(windows: List[Tuple[float, float]], duration_s: float, jitter_s: float, rng: random.Random):
+def plan_clips_for_row(row: pd.Series, clip_len_s: float, max_clips: int) -> List[dict]:
     """
-    Small random shift left/right, clipped to valid range.
-    """
-    if duration_s <= 0:
-        return windows
-    out = []
-    for (s, e) in windows:
-        if duration_s <= (e - s):
-            out.append((0.0, float(duration_s)))
-            continue
-        shift = rng.uniform(-jitter_s, jitter_s)
-        new_s = max(0.0, min(s + shift, duration_s - (e - s)))
-        out.append((float(new_s), float(new_s + (e - s))))
-    return out
-
-
-def plan_clips_for_row(row: pd.Series, policy: dict, rng: random.Random) -> List[dict]:
-    """
-    Create clip plan rows for one video.
-    Output dict fields match clips_manifest.csv schema.
+    Dense non-overlapping clip extraction with a per-video cap.
+    n_clips = min(floor(duration / clip_len), max_clips).
     """
     vid = row["video_id"]
     split = row["split"]
     duration_s = float(row.get("duration_s", 0) or 0)
     bucket = row.get("duration_bucket", "unknown")
 
-    if bucket not in policy:
-        # fallback: conservative
-        bp = BucketPolicy(n_clips=3, clip_len_s=5.0)
-        strategy = "fallback_uniform"
-    else:
-        bp = policy[bucket]
-        strategy = f"uniform_{bucket}"
+    raw_n = max(1, int(duration_s // clip_len_s))
+    n_clips = min(raw_n, max_clips)
+    capped = raw_n > max_clips
+    strategy = "dense_capped" if capped else "dense"
 
-    windows = uniform_windows(duration_s, bp.clip_len_s, bp.n_clips)
-
-    # For long videos, add a tiny jitter to avoid always hitting same temporal anchors
-    if bucket in {"60-120s", "120s+"} and len(windows) > 1:
-        windows = jitter_windows(windows, duration_s, jitter_s=0.75, rng=rng)
-        strategy = strategy + "_jitter"
+    windows = uniform_windows(duration_s, clip_len_s, n_clips)
 
     out = []
     for i, (s, e) in enumerate(windows):
@@ -136,7 +91,6 @@ def plan_clips_for_row(row: pd.Series, policy: dict, rng: random.Random) -> List
                 "clip_len_s": round(e - s, 3),
                 "duration_bucket": bucket,
                 "strategy_tag": strategy,
-                # keep useful grouping in the clip manifest too:
                 "orientation": row.get("orientation", "unknown"),
                 "fps_bucket": row.get("fps_bucket", "unknown"),
                 "audio_group": row.get("audio_group", "unknown"),
@@ -154,7 +108,8 @@ def main():
     ap.add_argument("--out_manifest", default="manifests/clips_manifest.csv")
     ap.add_argument("--out_dir", default="reports/clip_plan")
     ap.add_argument("--status_filter", default="video_ok", help="Only plan clips for this status (default: video_ok)")
-    ap.add_argument("--seed", type=int, default=13, help="Deterministic seed for jitter/randomness")
+    ap.add_argument("--clip_len", type=float, default=5.0, help="Clip length in seconds")
+    ap.add_argument("--max_clips_per_video", type=int, default=24, help="Cap clips per video (24 = 2min coverage)")
     args = ap.parse_args()
 
     df = pd.read_csv(args.manifest)
@@ -168,11 +123,9 @@ def main():
     df["fps_bucket"] = df.apply(lambda r: derive_fps_bucket(r.get("fps"), r.get("is_vfr")), axis=1)
     df["audio_group"] = df.apply(lambda r: derive_audio_group(r.get("has_audio")), axis=1)
 
-    rng = random.Random(args.seed)
-
     planned = []
     for _, row in df.iterrows():
-        planned.extend(plan_clips_for_row(row, DEFAULT_POLICY, rng))
+        planned.extend(plan_clips_for_row(row, args.clip_len, args.max_clips_per_video))
 
     clips_df = pd.DataFrame(planned)
 
@@ -192,8 +145,8 @@ def main():
         "clips_by_orientation": clips_df.groupby("orientation")["clip_id"].count().to_dict(),
         "clips_by_fps_bucket": clips_df.groupby("fps_bucket")["clip_id"].count().to_dict(),
         "clips_by_audio_group": clips_df.groupby("audio_group")["clip_id"].count().to_dict(),
-        "policy": {k: {"n_clips": v.n_clips, "clip_len_s": v.clip_len_s} for k, v in DEFAULT_POLICY.items()},
-        "seed": args.seed,
+        "clip_len_s": args.clip_len,
+        "max_clips_per_video": args.max_clips_per_video,
     }
     with open(os.path.join(args.out_dir, "summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
